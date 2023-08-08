@@ -196,6 +196,7 @@ export async function getServerSideProps(context: any) {
     console.log(context.query);
     let isDubAvailable;
     let animeInfo;
+    
     try {
         let { data } = await axios.get(siteConfig.apiUrl + "/meta/anilist/info/" + query + "?dub=true");
         isDubAvailable = true;
