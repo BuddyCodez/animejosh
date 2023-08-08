@@ -30,7 +30,6 @@ export const Head = () => {
 				href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
 				rel="stylesheet"
 			></link>
-			<script src="https://kit.fontawesome.com/79101233a3.js" crossOrigin="anonymous"></script>
 			<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5084862153214604"
 				crossOrigin="anonymous"></script>
 		</NextHead>
