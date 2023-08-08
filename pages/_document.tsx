@@ -8,7 +8,6 @@ export default function Document() {
       <body className="min-h-screen bg-background font-sans antialiased">
         <Main />
         <NextScript />
-        <Script src="https://kit.fontawesome.com/79101233a3.js" crossOrigin="anonymous"></Script>
       </body>
     </Html>
   )

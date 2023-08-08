@@ -120,13 +120,13 @@ export default function App({ Component, pageProps }: AppProps) {
 			<DefaultSeo
 				title={siteConfig.name}
 				description='Welcome to Anime Vite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeJosh today!'
-				canonical='https://animematrix.vercel.app/'
+				canonical='https://animevite.vercel.app/'
 				openGraph={{
 					title: 'AnimeVite - All in one anime platform',
 					description: 'Welcome to AnimeVite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeJosh today! ' + arr.join(", "),
 					images: [
 						{
-							url: 'https://animematrix.vercel.app/images/logo-no-background.png',
+							url: 'https://animevite.vercel.app/images/logo-no-background.png',
 							alt: 'AnimeVite'
 						}
 					],
@@ -134,7 +134,7 @@ export default function App({ Component, pageProps }: AppProps) {
 					article: {
 						tags: arr
 					},
-					url: 'https://animematrix.vercel.app/',
+					url: 'https://animevite.vercel.app/',
 					site_name: 'AnimeVite - All in one anime platform',
 
 				}} />

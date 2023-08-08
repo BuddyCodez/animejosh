@@ -69,7 +69,7 @@ const AnimeDetails = ({ anime }: { anime: AnimeType }) => {
     <>
       <DefaultLayout>
         <article>
-          <section className="anime-details spad mt-[60px]" style={{
+          <section className="anime-details spad mt-[60px] mb-4" style={{
             background: "var(--rich-black-fogra-29)"
           }}>
             <div className="container">
