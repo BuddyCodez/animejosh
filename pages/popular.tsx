@@ -25,7 +25,7 @@ interface AlertType {
     severity: AlertColor
 }
 
-const popular = ({ data }: { data: TrendingType }) => {
+const Popular = ({ data }: { data: TrendingType }) => {
 
     const [trending, setTrending] = useState < TrendingType > (data);
     const [loading, setLoading] = useState < boolean > (false);
@@ -184,7 +184,7 @@ const popular = ({ data }: { data: TrendingType }) => {
     )
 }
 
-export default popular;
+export default Popular;
 export const getStaticProps = async () => {
     const { data } = await axios.get(siteConfig.apiUrl + "/meta/anilist/popular?perPage=20");
     return {

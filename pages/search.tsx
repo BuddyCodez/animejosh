@@ -42,7 +42,7 @@ interface AlertType {
   message: string,
   severity: AlertColor
 }
-const search = ({ searchResult, keyword }: { searchResult: searchResultType, keyword: string },) => {
+const Search = ({ searchResult, keyword }: { searchResult: searchResultType, keyword: string },) => {
   const [searchResults, setSearch] = useState<searchResultType>(searchResult);
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = React.useState(false);
@@ -187,4 +187,4 @@ export async function getServerSideProps(context: any) {
     }
   }
 }
-export default search
+export default Search

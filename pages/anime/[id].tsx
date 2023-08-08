@@ -45,8 +45,11 @@ interface Episode {
 
   // Other properties of an episode, adjust accordingly.
 }
-const animeDetails = ({ anime }: { anime: AnimeType }) => {
-  console.log(anime);
+const AnimeDetails = ({ anime }: { anime: AnimeType }) => {
+  const [episodes, setEpisodes] = useState<Episode[] | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  // console.log(anime);
   const formatter = new Intl.NumberFormat('en', {
     notation: "compact",
     compactDisplay: "short",
@@ -56,9 +59,6 @@ const animeDetails = ({ anime }: { anime: AnimeType }) => {
     month: 'numeric',
     day: 'numeric',
   });
-  const [episodes, setEpisodes] = useState<Episode[] | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   useEffect(() => {
     const sortedEpisodes = anime.episodes.slice(0).sort((a: any, b: any) => a.number - b.number);
     const topEpisodes: any = sortedEpisodes.slice(0, 15);
@@ -268,5 +268,5 @@ export async function getServerSideProps(context: any) {
   }
 }
 
-export default animeDetails;
+export default AnimeDetails;
 export type { AnimeType };

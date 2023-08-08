@@ -25,7 +25,7 @@ interface AlertType {
     severity: AlertColor
 }
 
-const trending = ({ data }: { data: TrendingType }) => {
+const Trending = ({ data }: { data: TrendingType }) => {
 
     const [trending, setTrending] = useState<TrendingType>(data);
     const [loading, setLoading] = useState<boolean>(false);
@@ -184,7 +184,7 @@ const trending = ({ data }: { data: TrendingType }) => {
     )
 }
 
-export default trending
+export default Trending
 export const getStaticProps = async () => {
     const { data } = await axios.get(siteConfig.apiUrl + "/meta/anilist/trending?perPage=20");
     return {

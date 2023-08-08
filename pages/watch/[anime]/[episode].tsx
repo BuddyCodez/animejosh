@@ -20,7 +20,7 @@ import {
 } from '@vidstack/react';
 import { SettingsIcon } from '@vidstack/react/icons';
 import parseText from '@/utils/parseText';
-import { Switch } from '@nextui-org/react';
+import { Image, Switch } from '@nextui-org/react';
 import useFetcher from '@/utils/fetcher';
 interface Episode {
     id: string,
@@ -44,11 +44,11 @@ interface VideoData {
     download: string;
 }
 const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubAv }: { data: AnimeType, episodeInfo: Episode, epData: VideoData, episodes: any, episodeId: string, error: string, DubAv: boolean }) => {
-    if (error) return <h1>{error}</h1>;
     const [anime, setAnime] = useState(data);
     const aid: String = data?.id;
     const [Loading, setLoading] = useState(false);
     const [checked, setCheck] = useState(true);
+    if (error) return <h1>{error}</h1>;
     let bgStyle = {
         backgroundColor: "var(--rich-black-fogra-29)"
     };
@@ -158,7 +158,7 @@ const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubA
                                 <div className="flex flex-col">
                                     {anime?.relations && anime?.relations.slice(0, 7).map((item: any) => {
                                         return <div className="flex mb-2" key={item?.id}>
-                                            <img src={item?.image} alt="Related Anime" className="w-16 h-16 object-cover rounded-lg" />
+                                            <Image src={item?.image} alt="Related Anime" className="w-16 h-16 object-cover rounded-lg" />
                                             <div className="ml-4">
                                                 <small className="font-semibold">{parseText(item?.title)}</small>
                                                 <div className="flex justify-between items-center">
