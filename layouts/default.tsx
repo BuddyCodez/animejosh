@@ -1,6 +1,9 @@
 import { Navbar } from "@/components/navbar";
-import { Link } from "@nextui-org/link";
 import { Head } from "./head";
+import { Image } from "@nextui-org/react";
+import { Logo } from "@/components/icons";
+import { siteConfig } from "@/config/site";
+import Link from "next/link";
 
 export default function DefaultLayout({
 	children,
@@ -11,19 +14,48 @@ export default function DefaultLayout({
 		<div className="relative flex flex-col h-screen">
 			<Head />
 			<Navbar />
-			<main className="container mx-auto max-w-7xl px-6 flex-grow">
+			<main >
 				{children}
 			</main>
-			<footer className="w-full flex items-center justify-center py-3">
-				<Link
-					isExternal
-					className="flex items-center gap-1 text-current"
-					href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
-					title="nextui.org homepage"
-				>
-					<span className="text-default-600">Powered by</span>
-					<p className="text-primary">NextUI</p>
-				</Link>
+			<footer className="footer">
+				<div className="page-up">
+					<a onClick={() => {
+						window.scrollTo({
+							top: 0,
+							behavior: 'smooth'
+						});
+					}} id="scrollToTopButton"><i className="fa-solid fa-chevron-up"></i></a>
+				</div>
+				<div className="container">
+					<div className="row">
+						<div className="col-lg-3">
+							<div className="footer__logo flex gap-0 items-center">
+								<Logo />
+								{siteConfig?.name}
+							</div>
+						</div>
+						<div className="col-lg-6">
+							<div className="footer__nav">
+								<ul>
+									{siteConfig.navItems.map((item) => (
+										<li key={item.href}>
+											<Link href={item.href}>
+												{item.label}
+												</Link>
+										</li>
+									))}
+									
+								</ul>
+							</div>
+						</div>
+						<div className="col-lg-3">
+							<p>
+								Copyright &copy;{new Date().getFullYear()} All rights reserved | made with 💖 by <Link href="https://uditvegad.vercel.app" target="_blank">Udit Vegad.</Link>
+								</p>
+
+						</div>
+					</div>
+				</div>
 			</footer>
 		</div>
 	);
