@@ -12,21 +12,19 @@ import {
 	NavbarMenuItem,
 	Image
 } from "@nextui-org/react";
-
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User } from "@nextui-org/react";
 import { link as linkStyles } from "@nextui-org/theme";
-
 import { siteConfig } from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
 
-import { ThemeSwitch } from "@/components/theme-switch";
 import {
-	TwitterIcon,
 	GithubIcon,
 	DiscordIcon,
 	HeartFilledIcon,
 	SearchIcon,
 } from "@/components/icons";
+import { useSession, signIn, signOut } from "next-auth/react";
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar'
 import { Logo } from "@/components/icons";
 import { useRouter } from "next/router";
@@ -35,6 +33,7 @@ interface LoaderType {
 	continuousStart: () => void;
 }
 export const Navbar = () => {
+	const { data: session } = useSession();
 	const TopLoader = useRef<LoadingBarRef>(null);
 	const colors = [
 		"#ff7c05",
@@ -121,6 +120,7 @@ export const Navbar = () => {
 							</NavbarItem>
 						))}
 					</div>
+					
 				</NavbarContent>
 
 				<NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
@@ -134,17 +134,41 @@ export const Navbar = () => {
 
 					</NavbarItem>
 					<NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-					<NavbarItem className="hidden md:flex">
-						<Button
-							isExternal
-							as={Link}
-							className="text-sm font-normal text-default-600 bg-default-100"
-							href={siteConfig.links.sponsor}
-							startContent={<HeartFilledIcon className="text-danger" />}
-							variant="flat"
+					<NavbarItem>
+						{session ? <Dropdown placement="bottom-start">
+							<DropdownTrigger>
+								<User
+									as="button"
+									avatarProps={{
+										isBordered: true,
+										src: session?.user?.image || "",
+									}}
+									className="transition-transform"
+									description={session?.user?.email}
+									name={session.user?.name}
+								/>
+							</DropdownTrigger>
+							<DropdownMenu aria-label="User Actions" variant="flat">
+								<DropdownItem key="profile" className="h-14 gap-2">
+									<p className="font-bold">Signed in as</p>
+									<p className="font-bold">@{session?.user?.name}</p>
+								</DropdownItem>
+								<DropdownItem key="settings" onClick={() => router.push("/watchlist")}>
+									My WatchList
+								</DropdownItem>
+								<DropdownItem key="logout" color="danger" onClick={() => signOut()}>
+									Log Out
+								</DropdownItem>
+							</DropdownMenu>
+						</Dropdown> :	<Button color="primary" variant="shadow" endContent={
+							<DiscordIcon />
+						}
+							onClick={() => 
+								signIn("discord")
+							}
 						>
-							Sponsor
-						</Button>
+							Login
+						</Button>}
 					</NavbarItem>
 				</NavbarContent>
 
@@ -156,6 +180,7 @@ export const Navbar = () => {
 				</NavbarContent>
 
 				<NavbarMenu>
+
 					{searchInput}
 					<div className="mx-4 mt-2 flex flex-col gap-2">
 						{siteConfig.navMenuItems.map((item, index) => (
@@ -175,6 +200,13 @@ export const Navbar = () => {
 								</Link>
 							</NavbarMenuItem>
 						))}
+						<NavbarMenuItem className="w-full">
+							<Button color="primary" className="w-full" variant="shadow" endContent={
+								<DiscordIcon />
+							}>
+								Login
+							</Button>
+						</NavbarMenuItem>
 					</div>
 				</NavbarMenu>
 			</NextUINavbar>

@@ -19,9 +19,9 @@ export default function parseText(text: textType, length: number = -1) {
 }
 function parseAllText(text: textType) {
     let arr: any = [];
-    text.romaji && arr.push(text.romaji);
-    text.english && arr.push(text.english);
-    text.native && arr.push(text.native);
+    text?.romaji && arr.push(text.romaji);
+    text?.english && arr.push(text.english);
+    text?.native && arr.push(text.native);
     return arr.join(" / ");
 }
 export { parseAllText }

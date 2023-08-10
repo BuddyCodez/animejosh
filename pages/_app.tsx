@@ -12,7 +12,11 @@ import { fontSans, fontMono } from "@/config/fonts";
 import type { AppProps } from "next/app";
 import { DefaultSeo, LogoJsonLd } from 'next-seo';
 import { siteConfig } from '@/config/site';
-export default function App({ Component, pageProps }: AppProps) {
+import { SessionProvider } from "next-auth/react"
+export default function App({
+	Component,
+	pageProps: { session, ...pageProps },
+}: AppProps) {
 	const arr = ['Anime Vite', 'anime vite', 'ANIME VITE', 'AnimeVite', 'AnimeJosh', 'Anime Josh', 'Anime Josh', 'udit vegad', 'Udit Vegad', 'Udit', 'udit', 'Vegad', 'vegad', 'Udit vegad Anime', 'Animetronix', 'animematrix', 'animematrix.vercel.app', 'Anime Avenue', 'Anime', 'anime', 'Avenue',
 		"Anime streaming",
 		"Watch anime online",
@@ -139,8 +143,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
 				}} />
 		<NextUIProvider>
-			<NextThemesProvider>
+				<NextThemesProvider>
+					<SessionProvider session={session}>
+
 				<Component {...pageProps} />
+					</SessionProvider>
 			</NextThemesProvider>
 		</NextUIProvider>
 		</>

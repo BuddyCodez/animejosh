@@ -4,6 +4,8 @@ import { Image } from "@nextui-org/react";
 import { Logo } from "@/components/icons";
 import { siteConfig } from "@/config/site";
 import Link from "next/link";
+import { BsChevronUp } from "react-icons/bs";
+import { TbChevronUp } from "react-icons/tb";
 
 export default function DefaultLayout({
 	children,
@@ -24,7 +26,9 @@ export default function DefaultLayout({
 							top: 0,
 							behavior: 'smooth'
 						});
-					}} id="scrollToTopButton"><i className="fa-solid fa-chevron-up"></i></a>
+					}} id="scrollToTopButton">
+						<TbChevronUp className="icon w-full h-full flex justify-center items-center p-2"/>
+					</a>
 				</div>
 				<div className="container">
 					<div className="row">

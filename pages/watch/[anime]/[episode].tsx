@@ -18,10 +18,9 @@ import 'vidstack/styles/ui/menus.css';
 import {
     MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster,
 } from '@vidstack/react';
-import { SettingsIcon } from '@vidstack/react/icons';
 import parseText from '@/utils/parseText';
 import { Image, Switch } from '@nextui-org/react';
-import useFetcher from '@/utils/fetcher';
+import { useRouter } from 'next/router';
 interface Episode {
     id: string,
     number: number,
@@ -45,6 +44,8 @@ interface VideoData {
 }
 const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubAv }: { data: AnimeType, episodeInfo: Episode, epData: VideoData, episodes: any, episodeId: string, error: string, DubAv: boolean }) => {
     const [anime, setAnime] = useState(data);
+    const [episodeData, setEpisodeData] = useState(epData);
+    const router = useRouter();
     const aid: String = data?.id;
     const [Loading, setLoading] = useState(false);
     const [checked, setCheck] = useState(true);
@@ -59,8 +60,15 @@ const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubA
     });
     const FetchAndSet = async (isChecked: boolean) => {
         const { data } = await axios.get(siteConfig.apiUrl + '/meta/anilist/info/' + aid + "?dub=" + isChecked);
+        if (data) {
+            const epId = data?.episodes?.find((x: episodeType) => String(x.number) == router.query.episode);
+            const { data: epData } = await axios.get(siteConfig.apiUrl + "/meta/anilist/watch/" + epId?.id);
+            setEpisodeData(epData);
+            setAnime(data);
+        } else {
+            console.log("Error");
+        }
         data?.id && setLoading(false);
-        data?.id && setAnime(data);
         return data;
     }
     return (
@@ -83,7 +91,7 @@ const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubA
                                     <MediaPlayer
                                         title={episodeInfo.title}
                                         src={{
-                                            src: epData?.sources.find((x: any) => x.quality == "default")?.url || epData?.sources[0]?.url,
+                                            src: episodeData?.sources.find((x: any) => x.quality == "default")?.url || episodeData?.sources[0]?.url,
                                             type: 'application/x-mpegurl',
                                         }}
                                         poster={episodeInfo?.image}
