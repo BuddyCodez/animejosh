@@ -1,17 +1,15 @@
 import { siteConfig } from '@/config/site'
 import DefaultLayout from '@/layouts/default'
-import { CircularProgress, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import axios from 'axios'
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link';
 import { BsStar } from 'react-icons/bs';
 import { TbCalendarStats } from 'react-icons/tb';
 import parseText from '@/utils/parseText'
-import { Button, Skeleton } from '@nextui-org/react'
+import { Button } from '@nextui-org/react'
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertColor, AlertProps } from '@mui/material/Alert';
-import { useRouter } from 'next/router'
-import useFetcher from '@/utils/fetcher'
 interface AnimeType {
   id: String,
   malId: number,
@@ -44,23 +42,15 @@ interface AlertType {
   message: string,
   severity: AlertColor
 }
-const Search = () => {
-  const router = useRouter();
-  const { keyword } = router.query;
-  if (!keyword) return <DefaultLayout><Typography variant='h5'>No results found for {keyword}</Typography></DefaultLayout>;
-  const { data: searchResult, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/" + keyword);
-  const [searchResults, setSearch] = useState<searchResultType | null>(null);
+const Search = ({ searchResult, keyword }: { searchResult: searchResultType, keyword: string },) => {
+  const [searchResults, setSearch] = useState<searchResultType>(searchResult);
   const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = React.useState(false);
   const [alert, setAlert] = useState<AlertType>({
     message: "",
     severity: "error"
   });
-  useEffect(() => {
-    if (searchResult) {
-      setSearch(searchResult);
-    }
-  }, [searchResult])
+
   const handleClick = () => {
     setOpen(true);
   };
@@ -80,11 +70,10 @@ const Search = () => {
       let prevN = Number(searchResults?.currentPage);
       let newN = Number(res?.data?.currentPage);
       if (prevN < newN && hasNext) {
-        let results: any = res?.data?.results;
-        let searchres: any = searchResults?.results || [];
+        let results = res?.data?.results;
         setSearch({
           hasNextPage: res?.data?.hasNextPage,
-          results: [...searchres, ...results],
+          results: [...searchResults?.results, ...results],
           currentPage: res?.data?.currentPage
         });
         fetchedNew = true;
@@ -120,10 +109,7 @@ const Search = () => {
             </Snackbar>
             <Typography variant='h5'>Search results for {keyword}</Typography>
             <div className="flex justify-center items-center flex-wrap p-3">
-              {isLoading || !searchResult ? <div className='LoaderWrapper flex justify-center items-center' style={{width: "100vw", height: "100%"}}>
-                <CircularProgress />
-              </div> : null}
-              {!isLoading && searchResults?.results?.map((item: any, index: number) => {
+              {searchResults?.results?.map((item: any, index: number) => {
                 return <Link href={'/anime/' + item?.id} className="col-lg-4 col-md-6 col-sm-6" key={item?.id}>
                   <div className="product__item">
                     <div className="product__item__pic set-bg" style={{
@@ -188,5 +174,17 @@ const Search = () => {
     </>
   )
 }
-
+export async function getServerSideProps(context: any) {
+  const query = context?.query.keyword;
+  // console.log(context);
+  // console.log(query);
+  const { data: anime } = await axios.get(siteConfig.apiUrl + "/meta/anilist/" + query);
+  // console.log(anime?.results);
+  return {
+    props: {
+      searchResult: anime,
+      keyword: query || null,
+    }
+  }
+}
 export default Search

@@ -114,11 +114,9 @@ const Trending = ({ data }: { data: TrendingType }) => {
                             </h1>
 
                         </div>
-                        <div className="flex gap-2 flex-wrap justify-center items-center w-full">
+                        <div className="flex gap-2 flex-wrap justify-center items-center w-full p-3">
                             {trending?.results?.map((item: any) => {
-                                return <Link href={'/anime/' + item?.id} className="col-lg-4 col-md-6 col-sm-6" style={{
-                                    maxWidth: "19.333333%"
-                                }} key={item?.id}>
+                                return <Link href={'/anime/' + item?.id} className="col-lg-4 col-md-6 col-sm-6 Tcard" key={item?.id}>
                                     <div className="product__item">
                                         <div className="product__item__pic set-bg" style={{
                                             backgroundImage: `url(${item?.image})`,

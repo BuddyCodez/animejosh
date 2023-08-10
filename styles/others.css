@@ -767,3 +767,14 @@ font-family: 'Josefin Sans', sans-serif;
     box-shadow: 10014px 0 0 -5px;
   }
 }
+.Tcard {
+  width: 19.34%;
+  max-width: 19.34%;
+}
+@media (max-width: 768px) {
+  .Tcard {
+    width: 100%;
+    max-width: 100%;
+  }
+
+}

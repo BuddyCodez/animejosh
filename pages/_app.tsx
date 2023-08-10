@@ -17,7 +17,7 @@ export default function App({
 	Component,
 	pageProps: { session, ...pageProps },
 }: AppProps) {
-	const arr = ['Anime Vite', 'anime vite', 'ANIME VITE', 'AnimeVite', 'AnimeJosh', 'Anime Josh', 'Anime Josh', 'udit vegad', 'Udit Vegad', 'Udit', 'udit', 'Vegad', 'vegad', 'Udit vegad Anime', 'Animetronix', 'animematrix', 'animematrix.vercel.app', 'Anime Avenue', 'Anime', 'anime', 'Avenue',
+	const arr = ['Anime Vite', 'anime vite', 'ANIME VITE', 'AnimeVite', 'AnimeVite', 'Anime Josh', 'Anime Josh', 'udit vegad', 'Udit Vegad', 'Udit', 'udit', 'Vegad', 'vegad', 'Udit vegad Anime', 'Animetronix', 'animematrix', 'animematrix.vercel.app', 'Anime Avenue', 'Anime', 'anime', 'Avenue',
 		"Anime streaming",
 		"Watch anime online",
 		"Anime episodes",
@@ -123,14 +123,14 @@ export default function App({
 		<>
 			<DefaultSeo
 				title={siteConfig.name}
-				description='Welcome to Anime Vite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeJosh today!'
+				description='Welcome to Anime Vite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeVite today!'
 				canonical='https://animevite.vercel.app/'
 				openGraph={{
 					title: 'AnimeVite - All in one anime platform',
-					description: 'Welcome to AnimeVite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeJosh today! ' + arr.join(", "),
+					description: 'Welcome to AnimeVite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeVite today! ' + arr.join(", "),
 					images: [
 						{
-							url: 'https://animevite.vercel.app/images/logo-no-background.png',
+							url: 'https://animevite.vercel.app/animevite.png',
 							alt: 'AnimeVite'
 						}
 					],
