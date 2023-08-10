@@ -47,16 +47,7 @@ interface AlertType {
 const Search = () => {
   const router = useRouter();
   const { keyword } = router.query;
-
-  // Handle case when no keyword is available
-  if (!keyword) {
-    return (
-      <DefaultLayout>
-        <Typography variant='h5'>No results found for {keyword}</Typography>
-      </DefaultLayout>
-    );
-  }
-
+  if (!keyword) return <DefaultLayout><Typography variant='h5'>No results found for {keyword}</Typography></DefaultLayout>;
   const { data: searchResult, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/" + keyword);
   const [searchResults, setSearch] = useState<searchResultType | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
