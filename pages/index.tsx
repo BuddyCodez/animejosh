@@ -10,7 +10,9 @@ import { useEffect } from "react";
 export default function IndexPage() {
 	const { data: session } = useSession();
 	const fetchUser = async () => {
-		const { data } = await axios.get("/api/users/getid?email=" + session?.user?.email);
+		const { data } = await axios.post("/api/user/find", {
+			email: session?.user?.email,
+		});
 		return data || false;
 	};
 	const createUser = async () => {

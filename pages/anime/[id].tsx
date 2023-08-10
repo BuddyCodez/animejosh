@@ -2,15 +2,25 @@ import React, { useState, useRef, useEffect } from 'react'
 import DefaultLayout from '@/layouts/default';
 import { siteConfig } from '@/config/site';
 import axios from 'axios';
-import { Button, Card, Image, CardHeader, Chip, CardFooter, Pagination, Input, Skeleton } from '@nextui-org/react';
+import { Button, Card, Image, CardHeader, Chip, CardFooter, Pagination, Input, Skeleton, CircularProgress } from '@nextui-org/react';
 import parseText, { parseAllText, textType } from '@/utils/parseText';
 import StarRating from '@/components/starRating';
 import parse from 'html-react-parser';
-import { BsPlay, BsPlayFill } from 'react-icons/bs';
-import { Typography } from '@mui/material';
-import Link from 'next/link';
+import { BsPlay, BsPlayFill, BsSend } from 'react-icons/bs';
+
 import { useRouter } from 'next/router';
 import useFetcher from '@/utils/fetcher';
+import { parseISO, formatDistanceToNow } from 'date-fns';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { useSession } from 'next-auth/react';
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 interface AnimeType {
   id: String,
   malId: number,
@@ -46,14 +56,37 @@ interface Episode {
 
   // Other properties of an episode, adjust accordingly.
 }
+interface AlertType {
+  type: AlertProps["severity"];
+  message: string;
+}
 const AnimeDetails = () => {
   const router = useRouter();
-  console.log(router.query);
+  const [comments, setComments] = useState([]);
   const { data: anime, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + router.query.id);
-  const { data: comments, isLoading: commentsLoading } = useFetcher("/api/comments?animeId=" + router.query.id);
   const [episodes, setEpisodes] = useState<Episode[] | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  console.log(anime);
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const { data: session } = useSession();
+  const [alert, setAlert] = useState<AlertType>({
+    type: "success",
+    message: "This is a success message!"
+  });
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  // console.log(anime);
   const formatter = new Intl.NumberFormat('en', {
     notation: "compact",
     compactDisplay: "short",
@@ -63,6 +96,69 @@ const AnimeDetails = () => {
     month: 'numeric',
     day: 'numeric',
   });
+  // date Compare like 1 hour ago, few seconds ago..
+  const formatTimeDifference = (timestamp: number): string => {
+    const currentTime = new Date().getTime();
+    const timeDifference = currentTime - timestamp;
+
+    if (timeDifference < 1000) {
+      return 'just now';
+    } else if (timeDifference < 60000) {
+      const seconds = Math.floor(timeDifference / 1000);
+      return `${seconds} seconds ago`;
+    } else if (timeDifference < 3600000) {
+      const minutes = Math.floor(timeDifference / 60000);
+      return `${minutes} minutes ago`;
+    } else if (timeDifference < 86400000) {
+      const hours = Math.floor(timeDifference / 3600000);
+      return `${hours} hours ago`;
+    } else {
+      const days = Math.floor(timeDifference / 86400000);
+      return `${days} days ago`;
+    }
+  };
+  async function getComments() {
+    await axios.post("/api/comments/getall", {
+      animeId: router.query.id
+    }).then((res) => {
+      if (res?.data?.comments?.length > 0) return setComments(res?.data?.comments);
+    })
+  }
+  async function CreateComment() {
+    setSending(true);
+    if (!session) {
+      setAlert({
+        type: "error",
+        message: "You need to login first!"
+      });
+      handleClick();
+    }
+    if (!message) return;
+    const getUserid: any = await axios.post("/api/user/find", {
+      email: session?.user?.email,
+    }).then(res => res?.data?.userId);
+    await axios.post("/api/comments/create", {
+      animeId: router.query.id,
+      message: message,
+      userId: getUserid,
+    })
+    await axios.post("/api/comments/getall", {
+      animeId: router.query.id
+    }).then((res) => {
+      if (res?.data?.comments?.length > 0) return setComments(res?.data?.comments);
+    })
+    setAlert({
+      type: "success",
+      message: "Comment Added!"
+    });
+    handleClick();
+    setSending(false);
+  }
+  useEffect(() => {
+    if (router?.query?.id) {
+      getComments();
+    }
+  }, [router])
   useEffect(() => {
     if (!isLoading && anime) {
       const sortedEpisodes = anime?.episodes?.slice(0).sort((a: any, b: any) => a.number - b.number);
@@ -75,6 +171,11 @@ const AnimeDetails = () => {
     <>
       <DefaultLayout>
         <article>
+          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity={alert?.type || "error"} sx={{ width: '100%' }}>
+              {alert?.message}
+            </Alert>
+          </Snackbar>
           <section className="anime-details spad mt-[60px] mb-4" style={{
             background: "var(--rich-black-fogra-29)"
           }}>
@@ -236,6 +337,46 @@ const AnimeDetails = () => {
                       // initialPage={1}
                       />}
                     </div>
+                    {/* // comments  */}
+                    <div className="row mt-5">
+                      <div className="col-lg-8">
+                        <div className="anime__details__review">
+                          <div className="section-title my-2">
+                            <h5>Reviews</h5>
+                          </div>
+                          {comments && comments?.map((comment: any) => {
+                            return <div className="anime__review__item" key={comment._id}>
+                              <div className="anime__review__item__pic">
+                                <Image src={comment?.user.image} alt="Comment Image" />
+                              </div>
+                              <div className="anime__review__item__text">
+                                <h6 className='flex gap-2 justify-between items-center flex-wrap'>{comment?.user.name} - <span>{comment?.createdAt && formatDistanceToNow(parseISO(comment?.createdAt), { addSuffix: true })}</span></h6>
+                                <p>{comment?.message}</p>
+                              </div>
+                            </div>
+                          })}
+                          {sending && <div className='flex gap-5 w-full h-[100px] justify-center items-center'>
+                            <div className="dot-pulse"></div>
+                            <p>Sending Message...</p>
+                          </div>}
+                          <div className="anime__details__form">
+                            <div className="section-title">
+                              <h5>Your Comment</h5>
+                            </div>
+                            <div className="mycomment w-full flex-col gap-2">
+                              <textarea className=" bg-gray-700 border border-blue-300 rounded p-2 w-full h-40 resize-none focus:outline-none focus:ring focus:border-blue-300" placeholder="Your Comment" id="comment" name="comment" rows={4}
+                                onChange={(e) => setMessage(e.target.value)}
+                              />
+                              <Button endContent={
+                                <BsSend />
+                              } color='primary' variant='solid'
+                                onPress={CreateComment}
+                              >Send</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -246,18 +387,7 @@ const AnimeDetails = () => {
     </>
   )
 }
-// export async function getServerSideProps(context: any) {
-//   const query = context?.query.id;
-//   console.log(context.query);
-//   // console.log(query);
-//   const { data: anime } = await axios.get(siteConfig.apiUrl + "/meta/anilist/info/" + query);
-//   // console.log(anime);
-//   return {
-//     props: {
-//       anime: anime,
-//     }
-//   }
-// }
+
 
 export default AnimeDetails;
 export type { AnimeType };
