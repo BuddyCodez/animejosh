@@ -1,10 +1,11 @@
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
-import { BsFillPlayFill } from "react-icons/bs";
+import { BsCalendar2DateFill, BsChevronRight, BsFillPlayFill, BsPlayCircleFill } from "react-icons/bs";
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-
+import { MdWatchLater } from 'react-icons/md';
+import { GrStatusGoodSmall } from 'react-icons/gr';
 import { Swiper, SwiperSlide } from 'swiper/react';
-
+import { useRouter } from "next/dist/client/router";
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -15,7 +16,14 @@ import { siteConfig } from "@/config/site";
 import parseText from "@/utils/parseText";
 import parse from 'html-react-parser';
 const Hero = () => {
+    const router = useRouter();
+    const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+    });
     const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/trending");
+    console.log(data);
     return (
         <section className="MyHero hero flex justify-start items-start p-0" >
             <div className="w-full h-auto" style={{ margin: "0px 0" }}>
@@ -41,28 +49,44 @@ const Hero = () => {
                             </div>
                             <div className="content">
                                 <div className="content-inner">
+                                    <div className="spotlight">
+                                        <p>#{index + 1} Spotlight</p>
+                                    </div>
                                     <h1 className="title">{parseText(item?.title)}</h1>
                                     <div className="geners">
                                         {item?.genres.map((e: any) => {
                                             return <span key={e}>{e}</span>
                                         })}
                                     </div>
-                                    <p className="description">
-                                        {item?.description.length >= 300 ? parse(item?.description.slice(0, 350)) + "..." : parse(item?.description)}
+                                    <p className="description text-xs md:text-sm mb-4 leading-5 line-clamp-2 lg:line-clamp-4 font-light lg:mb-5">
+                                        {parse(item?.description)}
                                     </p>
-                                    <p className="status">
-                                        <span className="status-item">
-                                            <span className="status-item-label">Status:</span>
-                                            <span className="status-item-value">{item?.status}</span>
+                                    <div className="flex gap-4 w-full flex-wrap">
+                                        <div className="icon">
+                                            <BsPlayCircleFill />
+                                            <span>{item?.type}</span>
+                                        </div>
+                                        <div className="icon">
+                                            <MdWatchLater />
+                                            <span>{item?.duration}/min</span>
+                                        </div>
+                                        <div className="icon">
+                                            <BsCalendar2DateFill />
+                                            <span>{item?.releaseDate || "Unkown"}</span>
+                                        </div>
+                                        <div className="icon">
+                                            <GrStatusGoodSmall />
+                                            <span>{item?.status || "Unkown"}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-5 actionWrap">
+                                        <span onClick={() => router.push(`/watch/${item?.id}/1`)} className="action-item">
+                                          Watch Now
+                                       </span>
+                                        <span onClick={() => router.push(`/anime/${item?.id}`)} className="action-item">
+                                                <span className="flex gap-1 items-center justify-center">Details <BsChevronRight /></span>
                                         </span>
-                                    </p>
-                                </div>
-                                <div className="playcontainer">
-                                    <Link href={`/anime/${item?.id}`}>
-                                        <span className="playIcon">
-                                            <BsFillPlayFill />
-                                        </span>
-                                    </Link>
+                                    </div>
                                 </div>
                             </div>
 
