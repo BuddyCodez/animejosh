@@ -61,20 +61,59 @@ const WatchPage = () => {
     const router = useRouter();
     const query = router.query?.anime;
     const episodeNumber = router.query?.episode;
-    try {
-        const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query + "?dub=true");
+    const Fetch =  () => {
+        let error = "";
+        const { data, isLoading, error: er } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query + "?dub=true");
         let isDubAvailable = true;
-        if (!data?.episodes || data.episodes.length === 0)
-            throw new Error("Cant Load Anime Try again Later");
+        if (!data?.episodes || data.episodes.length === 0) error = "Cant Load Anime Try again Later";
         const episodeInfo = data?.episodes?.find((x: episodeType) => String(x.number) == episodeNumber);
         const episodeId = episodeInfo?.id;
-        if (!episodeId || episodeInfo?.title) throw new Error("Cant Load Anime Try again Later");
+        if (!episodeId || episodeInfo?.title) error = "Cant Load Anime Try again Later";
         const { data: epData } = useFetcher(siteConfig.apiUrl + "/meta/anilist/watch/" + episodeId);
-        if (!epData?.sources || epData.sources.length === 0) throw new Error("Cant Load Anime Try again Later");
-        console.log(data?.title?.english);
+        if (!epData?.sources || epData.sources.length === 0) error = "Cant Load Anime Try again Later";
+        // console.log(data?.title?.english);
         let sortedEpisodes = data?.episodes?.sort((a: any, b: any) => a.number - b.number);
         const url = `/api/skiptimings?malid=${data?.malId}&epnumber=${episodeNumber}&eplen=0`;
         const { data: skipData } = useFetcher(url);
+        return {
+            skipData: skipData,
+            isDubAvailable: isDubAvailable,
+            data: data,
+            isLoading: isLoading,
+            episodeInfo: episodeInfo,
+            epData: epData,
+            sortedEpisodes: sortedEpisodes,
+            episodeId: episodeId,
+            error: (error || er) ? "cant load" : null
+        }
+    }
+    const Fetch2 =  () => {
+        let isDubAvailable = false;
+        const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query);
+        const episodeInfo = data?.episodes?.find((x: episodeType) => String(x.number) == episodeNumber);
+        const episodeId = episodeInfo?.id;
+        const { data: epData } = useFetcher(siteConfig.apiUrl + "/meta/anilist/watch/" + episodeId);
+        // console.log(data?.title?.english);
+        let sortedEpisodes = data?.episodes?.sort((a: any, b: any) => a.number - b.number);
+        const error = "";
+        const url = `/api/skiptimings?malid=${data?.malId}&epnumber=${episodeNumber}&eplen=0`;
+        const { data: skipData } = useFetcher(url);
+        return {
+            skipData: skipData,
+            isDubAvailable: isDubAvailable,
+            data: data,
+            isLoading: isLoading,
+            episodeInfo: episodeInfo,
+            epData: epData,
+            sortedEpisodes: sortedEpisodes,
+            episodeId: episodeId,
+            error: error
+        }
+    }
+    try {
+        let { skipData, isDubAvailable, data, isLoading, episodeInfo, epData, sortedEpisodes, episodeId, error }: any = Fetch();
+        console.log(error);
+        if (error) throw new Error(error);
         return (
             <>
                 {isLoading && <DefaultLayout>
@@ -88,26 +127,18 @@ const WatchPage = () => {
             </>
         );
     } catch (e) {
-        let isDubAvailable = false;
-        const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query);
-        const episodeInfo = data?.episodes?.find((x: episodeType) => String(x.number) == episodeNumber);
-        const episodeId = episodeInfo?.id;
-        const { data: epData } = useFetcher(siteConfig.apiUrl + "/meta/anilist/watch/" + episodeId);
-        console.log(data?.title?.english);
-        let sortedEpisodes = data?.episodes?.sort((a: any, b: any) => a.number - b.number);
-        const error = "";
-        const url = `/api/skiptimings?malid=${data?.malId}&epnumber=${episodeNumber}&eplen=0`;
-        const { data: skipData } = useFetcher(url);
+        const { skipData, isDubAvailable, data, isLoading, episodeInfo, epData, sortedEpisodes, episodeId, error }: any = Fetch2();
+        const Loading = !data;
         return (
             <>
-                {isLoading && <DefaultLayout>
+                {(isLoading || Loading) && <DefaultLayout>
                     <div className="flex flex-col items-center justify-center h-screen">
                         <div className='LoadWrapper'>
                             <div className="loader"></div>
                         </div>
                     </div>
                 </DefaultLayout>}
-                {!isLoading && <AnimeWatchPage data={data} episodeInfo={episodeInfo} epData={epData} episodes={sortedEpisodes} episodeId={episodeId} error={error} DubAv={isDubAvailable} skipTimings={skipData} />}
+                {(!isLoading || !Loading) && <AnimeWatchPage data={data} episodeInfo={episodeInfo} epData={epData} episodes={sortedEpisodes} episodeId={episodeId} error={error} DubAv={isDubAvailable} skipTimings={skipData} />}
             </>
         );
     }
