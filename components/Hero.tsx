@@ -23,7 +23,6 @@ const Hero = () => {
         day: 'numeric',
     });
     const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/trending");
-    console.log(data);
     return (
         <section className="MyHero hero flex justify-start items-start p-0" >
             <div className="w-full h-auto" style={{ margin: "0px 0" }}>

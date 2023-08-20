@@ -6,7 +6,7 @@ import { Button, Card, Image, CardHeader, Chip, CardFooter, Pagination, Input, S
 import parseText, { parseAllText, textType } from '@/utils/parseText';
 import StarRating from '@/components/starRating';
 import parse from 'html-react-parser';
-import { BsPlay, BsPlayFill, BsSend } from 'react-icons/bs';
+import { BsPlay, BsPlayFill, BsSend, BsTrash2Fill } from 'react-icons/bs';
 
 import { useRouter } from 'next/router';
 import useFetcher from '@/utils/fetcher';
@@ -14,6 +14,7 @@ import { parseISO, formatDistanceToNow } from 'date-fns';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { useSession } from 'next-auth/react';
+import { userContextType, useUserContext } from '@/contex/User';
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref,
@@ -70,6 +71,7 @@ const AnimeDetails = () => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const { data: session } = useSession();
+  const { uid } = useUserContext() as userContextType;
   const [alert, setAlert] = useState<AlertType>({
     type: "success",
     message: "This is a success message!"
@@ -154,6 +156,43 @@ const AnimeDetails = () => {
     handleClick();
     setSending(false);
   }
+  async function deleteComment(message: string) {
+    if (!session) {
+      setAlert({
+        type: "error",
+        message: "You need to login first!"
+      });
+    }
+    if (!uid || uid == undefined) return;
+    await axios.delete(`/api/comments/delete`, {
+      params: {
+        animeId: router.query.id,
+        msg: message,
+        uid: uid
+      }
+    }).then(async (res) => {
+      let data = await res.data;
+      if (data?.message) {
+        const type = data?.type;
+        setAlert({
+          type: type,
+          message: data.message
+        });
+        handleClick();
+      } else {
+        setAlert({
+          type: "error",
+          message: "Something went wrong!"
+        });
+        handleClick();
+      }
+    });
+    await axios.post("/api/comments/getall", {
+      animeId: router.query.id
+    }).then((res) => {
+      if (res?.data?.comments) return setComments(res?.data?.comments);
+    })
+  }
   useEffect(() => {
     if (router?.query?.id) {
       getComments();
@@ -176,7 +215,7 @@ const AnimeDetails = () => {
               {alert?.message}
             </Alert>
           </Snackbar>
-          <section className="anime-details spad mt-[60px] mb-4" style={{
+          <section className="anime-details spad mt-[60px]" style={{
             background: "var(--rich-black-fogra-29)"
           }}>
             <div className="container">
@@ -197,7 +236,7 @@ const AnimeDetails = () => {
                           isLoading ? <Skeleton className="h-3 w-3/5 rounded-lg" /> : parseText(anime?.title)
                         }</h3>
                         <span>{
-                          isLoading ? <Skeleton className="h-3 w-3/5 rounded-lg" /> : anime?.synonyms?.slice(0, 3).join(" / ")
+                          isLoading ? <Skeleton className="h-3 w-3/5 rounded-lg" /> : anime?.synonyms?.join(" / ")
                         }</span>
                       </div>
                       <div className="anime__details__rating  hideonphone">
@@ -243,7 +282,7 @@ const AnimeDetails = () => {
                 </div>
               </div>
               <div className="row">
-                <div className="col-lg-9 col-md-8">
+                <div className="col-lg-8 col-md-8">
                   <div className="anime__details__review" ref={ref}>
                     <div className="section-title flex justify-between items-center">
                       <h5 className='text-3xl bold text-white flex justify-between items-center w-full'>Episodes:
@@ -272,7 +311,7 @@ const AnimeDetails = () => {
                       </h5>
 
                     </div>
-                    <div className="flex flex-wrap gap-3 mt-3">
+                    <div className="flex flex-wrap gap-2 mt-3">
                       {
                         isLoading && [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item: any, index: number) => {
                           return <Card className=" h-[300px] w-[250px]" isPressable isHoverable key={index}>
@@ -350,7 +389,15 @@ const AnimeDetails = () => {
                                 <Image src={comment?.user.image} alt="Comment Image" />
                               </div>
                               <div className="anime__review__item__text">
-                                <h6 className='flex gap-2 justify-between items-center flex-wrap'>{comment?.user.name} - <span>{comment?.createdAt && formatDistanceToNow(parseISO(comment?.createdAt), { addSuffix: true })}</span></h6>
+                                <h6 className='flex gap-2 justify-between items-center flex-wrap'>{comment?.user.name} <div className="flex justify-center items-center gap-2">
+                                  <span>{comment?.createdAt && formatDistanceToNow(parseISO(comment?.createdAt), { addSuffix: true })}</span>
+                                  {comment?.user.email == session?.user?.email && <Button isIconOnly
+                                    variant='light'
+                                    onClick={() => deleteComment(comment?.message)}
+                                    endContent={
+                                      <BsTrash2Fill />
+                                    } />}
+                                </div></h6>
                                 <p>{comment?.message}</p>
                               </div>
                             </div>
@@ -376,7 +423,77 @@ const AnimeDetails = () => {
                           </div>
                         </div>
                       </div>
+
                     </div>
+                  </div>
+                </div>
+                <div className="col-lg-4 col-md-4">
+                  <div className="anime__details__sidebar product__sidebar">
+                    <div className="section-title">
+                      <h5 className='p-0 w-[120px]'>you might like...</h5>
+                    </div>
+                    <div className="flex flex-col w-full justify-center items-center mt-3 gap-3">
+                      
+                    {
+                      isLoading && [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item: any, index: number) => {
+                        return <Card className=" h-[300px] w-[250px]" isPressable isHoverable key={index}>
+                          <CardHeader className="absolute z-10 top-1 flex-col !items-start">
+                            <div className="flex justify-between w-full">
+                              <Skeleton className="h-3 w-3/5 rounded-lg" />
+                            </div>
+                          </CardHeader>
+                          <Skeleton className="h-[200px] w-full rounded-lg" />
+                          <CardFooter className="absolute z-10 bottom-0 flex-col" style={{
+                            backgroundImage: " linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0))",
+                            width: "100%"
+                          }}>
+                            <Skeleton className="h-3 w-3/5 rounded-lg" />
+                          </CardFooter>
+                        </Card>
+                      })
+
+                      }
+                      {!isLoading && anime?.recommendations && anime?.recommendations?.slice(0,5)?.map((item: any, index: number) => {
+                        return <Card className="h-[300px] w-[250px]" isPressable isHoverable key={item?.id || index}
+                          onPress={() => {
+                            router.push("/anime/" + item?.id);
+                          }}
+                        >
+                          <CardHeader className="absolute z-10 top-1 flex-col !items-start">
+                            <div className="flex justify-between w-full">
+                              <Chip color="primary" variant="shadow"><div className="flex items-center gap-2 justify-center">
+                                {item?.rating / 10} <i className="fa-solid fa-star" style={{
+                                  fontSize: "12px"
+                                }}></i>
+                              </div> </Chip>
+                              {item?.status && <Chip color="default" variant="shadow" >
+                                <span className='flex justify-center items-center gap-2 '>
+                                  <i className="fa-solid fa-circle text-sm" style={{
+                                    fontSize: "5px"
+                                  }}></i>
+                                  {item?.status}
+                                </span>
+                              </Chip>}
+                            </div>
+                          </CardHeader>
+                          <Image
+                            removeWrapper
+                            alt="Card background"
+                            className="z-0 w-full h-full object-cover"
+                            src={item?.image}
+                            isBlurred
+                            isZoomed
+                          />
+                          <CardFooter className="absolute z-10 bottom-0 flex-col" style={{
+                            backgroundImage: " linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0))",
+                            width: "100%"
+                          }}>
+                            <p className='poppins text-md'>{parseText(item?.title)}</p>
+
+                          </CardFooter>
+                        </Card>
+                      })}
+                      </div>
                   </div>
                 </div>
               </div>

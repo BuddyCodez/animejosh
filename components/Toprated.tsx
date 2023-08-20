@@ -16,7 +16,6 @@ const Toprated = () => {
     const { data: dubdata, isLoading: dubloading } = useFetcher("https://animejosh.uditvegad.repl.co/recent-release?type=2");
     const { data: popular, isLoading: popload } = useFetcher(siteConfig.apiUrl + "/meta/anilist/popular?perPage=6");
     const { data: trending, isLoading: trendLoad } = useFetcher(siteConfig.apiUrl + "/meta/anilist/trending?perPage=9");
-    console.log(trending);
     return (
         <>
             <section className="product spad">

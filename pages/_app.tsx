@@ -13,6 +13,8 @@ import type { AppProps } from "next/app";
 import { DefaultSeo, LogoJsonLd } from 'next-seo';
 import { siteConfig } from '@/config/site';
 import { SessionProvider } from "next-auth/react"
+import { UserProvider } from '@/contex/User';
+import Script from 'next/script';
 export default function App({
 	Component,
 	pageProps: { session, ...pageProps },
@@ -121,6 +123,7 @@ export default function App({
 	];
 	return (
 		<>
+			<Script src="https://kit.fontawesome.com/79101233a3.js" crossOrigin="anonymous"></Script>
 			<DefaultSeo
 				title={siteConfig.name}
 				description='Welcome to Anime Vite - your ultimate destination for all things anime! Find the latest news, reviews, and recommendations for your favorite shows, as well as new discoveries. Join our passionate community of anime fans and explore the fascinating world of Japanese animation like never before. Start your journey on AnimeVite today!'
@@ -142,14 +145,15 @@ export default function App({
 					site_name: 'AnimeVite - All in one anime platform',
 
 				}} />
-		<NextUIProvider>
+			<NextUIProvider>
 				<NextThemesProvider>
 					<SessionProvider session={session}>
-
-				<Component {...pageProps} />
-					</SessionProvider>
-			</NextThemesProvider>
-		</NextUIProvider>
+						<UserProvider>
+							<Component {...pageProps} />
+						</UserProvider>
+					</SessionProvider>x``
+				</NextThemesProvider>
+			</NextUIProvider>
 		</>
 	);
 }
