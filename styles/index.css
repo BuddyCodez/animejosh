@@ -832,3 +832,6 @@
 		display: none;
 	}
 }
+.swiper .swiper-pagination-bullet {
+	background: #0b85ff;
+}

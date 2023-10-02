@@ -1,3 +1,5 @@
+
+
 import { siteConfig } from '@/config/site';
 import DefaultLayout from '@/layouts/default';
 import { AnimeType } from '@/pages/anime/[id]';
@@ -14,7 +16,7 @@ import 'vidstack/styles/ui/tooltips.css';
 import 'vidstack/styles/ui/live.css';
 import 'vidstack/styles/ui/sliders.css';
 import 'vidstack/styles/ui/menus.css';
-
+import useSWR from 'swr';
 import {
     MediaCommunitySkin, MediaOutlet, MediaPlayer, MediaPoster, useMediaStore,
 } from '@vidstack/react';
@@ -22,10 +24,11 @@ import { useRef } from 'react';
 import { type MediaPlayerElement } from 'vidstack';
 
 import parseText from '@/utils/parseText';
-import { Button, ButtonGroup, Image, Skeleton, Switch } from '@nextui-org/react';
+import { Button, ButtonGroup, Image, Input, Skeleton, Switch } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 import useFetcher from '@/utils/fetcher';
 import { BsFillSkipEndFill, BsFillSkipStartFill } from 'react-icons/bs';
+import { SearchIcon } from '@/components/icons';
 interface Episode {
     id: string,
     number: number,
@@ -57,63 +60,29 @@ type SkipTimings = {
     episodeLength: number;
 }
 
-const WatchPage = () => {
+let fetcher = (...args: any) => axios.get(args, { timeout: 60000 }).then((res) => res.data);
+const WatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error, DubAv, skipTimings }: { data: AnimeType, episodeInfo: Episode, epData: VideoData, episodes: any, episodeId: string, error: string, DubAv: boolean, skipTimings: SkipTimings[] }) => {
     const router = useRouter();
-    const query = router.query?.anime;
+    const animeId = router.query?.anime;
     const episodeNumber = router.query?.episode;
-    const Fetch =  () => {
-        let error = "";
-        const { data, isLoading, error: er } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query + "?dub=true");
-        let isDubAvailable = true;
-        if (!data?.episodes || data.episodes.length === 0) error = "Cant Load Anime Try again Later";
-        const episodeInfo = data?.episodes?.find((x: episodeType) => String(x.number) == episodeNumber);
-        const episodeId = episodeInfo?.id;
-        if (!episodeId || episodeInfo?.title) error = "Cant Load Anime Try again Later";
-        const { data: epData } = useFetcher(siteConfig.apiUrl + "/meta/anilist/watch/" + episodeId);
-        if (!epData?.sources || epData.sources.length === 0) error = "Cant Load Anime Try again Later";
-        // console.log(data?.title?.english);
-        let sortedEpisodes = data?.episodes?.sort((a: any, b: any) => a.number - b.number);
-        const url = `/api/skiptimings?malid=${data?.malId}&epnumber=${episodeNumber}&eplen=0`;
-        const { data: skipData } = useFetcher(url);
+    const Fetch = () => {
+        const { data, error } = useSWR(`/api/episodes/${animeId}/${episodeNumber}`, fetcher);
+        let isLoading = !data && !error;
         return {
-            skipData: skipData,
-            isDubAvailable: isDubAvailable,
-            data: data,
+            skipData: [],
+            isDubAvailable: data?.dubAvailable,
+            data: data?.animeInfo,
             isLoading: isLoading,
-            episodeInfo: episodeInfo,
-            epData: epData,
-            sortedEpisodes: sortedEpisodes,
+            episodeInfo: data?.episodeInfo,
+            epData: data?.episodeSource,
+            sortedEpisodes: data?.sortedEpisodes,
             episodeId: episodeId,
-            error: (error || er) ? "cant load" : null
         }
     }
-    const Fetch2 =  () => {
-        let isDubAvailable = false;
-        const { data, isLoading } = useFetcher(siteConfig.apiUrl + "/meta/anilist/info/" + query);
-        const episodeInfo = data?.episodes?.find((x: episodeType) => String(x.number) == episodeNumber);
-        const episodeId = episodeInfo?.id;
-        const { data: epData } = useFetcher(siteConfig.apiUrl + "/meta/anilist/watch/" + episodeId);
-        // console.log(data?.title?.english);
-        let sortedEpisodes = data?.episodes?.sort((a: any, b: any) => a.number - b.number);
-        const error = "";
-        const url = `/api/skiptimings?malid=${data?.malId}&epnumber=${episodeNumber}&eplen=0`;
-        const { data: skipData } = useFetcher(url);
-        return {
-            skipData: skipData,
-            isDubAvailable: isDubAvailable,
-            data: data,
-            isLoading: isLoading,
-            episodeInfo: episodeInfo,
-            epData: epData,
-            sortedEpisodes: sortedEpisodes,
-            episodeId: episodeId,
-            error: error
-        }
-    }
+
     try {
-        let { skipData, isDubAvailable, data, isLoading, episodeInfo, epData, sortedEpisodes, episodeId, error }: any = Fetch();
-        console.log(error);
-        if (error) throw new Error(error);
+        if (!router.query?.anime || !router.query?.episode) return;
+        let { skipData, isDubAvailable, data, isLoading, episodeInfo, epData, sortedEpisodes, episodeId }: any = Fetch();
         return (
             <>
                 {isLoading && <DefaultLayout>
@@ -127,20 +96,8 @@ const WatchPage = () => {
             </>
         );
     } catch (e) {
-        const { skipData, isDubAvailable, data, isLoading, episodeInfo, epData, sortedEpisodes, episodeId, error }: any = Fetch2();
-        const Loading = !data;
-        return (
-            <>
-                {(isLoading || Loading) && <DefaultLayout>
-                    <div className="flex flex-col items-center justify-center h-screen">
-                        <div className='LoadWrapper'>
-                            <div className="loader"></div>
-                        </div>
-                    </div>
-                </DefaultLayout>}
-                {(!isLoading || !Loading) && <AnimeWatchPage data={data} episodeInfo={episodeInfo} epData={epData} episodes={sortedEpisodes} episodeId={episodeId} error={error} DubAv={isDubAvailable} skipTimings={skipData} />}
-            </>
-        );
+        console.error(e);
+
     }
 
 }
@@ -163,21 +120,26 @@ const AnimeWatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error,
     const [skipOut, setSkipOut] = useState(false);
     const player = useRef<MediaPlayerElement>(null);
     const { currentTime, duration } = useMediaStore(player);
+    const [searchEnabled, setSearchEnabled] = useState(false);
+    const [filteredEpisodes, setFilteredEpisodes] = useState(episodes);
     // when the video is ended, go to next episode
-
-
-    useEffect(() => {
-        // console.log(currentTime, duration);
+    const episodeNumber = router.query?.episode;
+    function AutoPlayNextEpisode() {
         if ((currentTime == duration) && (currentTime != 0 && duration != 0)) {
             if (autoPlayNext == false) return;
             let NextEpNumber = router.query.episode ? Number(router.query.episode) + 1 : 1;
             const epId = episodes?.find((x: episodeType) => String(x.number) == String(NextEpNumber));
+            // console.log(epId);
             if (epId) {
                 console.log("[Autoplay]: Next Episode");
                 router.push(`/watch/${anime?.id}/${epId?.number}`);
             }
         }
-        if (skipTimings && skipTimings?.length > 0) {
+    }
+    useEffect(() => {
+        AutoPlayNextEpisode();
+        console.log(currentTime, duration)
+        if (Array.isArray(skipTimings) && skipTimings?.length > 0) {
             const timings: SkipTimings[] = skipTimings.filter((x: SkipTimings) => x.skipType == "op" || x.skipType == "ed");
             if (!timings.length) return;
             if (timings[0]?.skipType == "op" && skipIn) {
@@ -193,7 +155,8 @@ const AnimeWatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error,
                 }
             }
         }
-    }, [currentTime, duration, autoPlayNext, skipTimings, skipIn, skipOut]);
+    }, [currentTime, duration, skipTimings, skipIn, skipOut]);
+
     let bgStyle = {
         backgroundColor: "var(--rich-black-fogra-29)"
     };
@@ -248,7 +211,7 @@ const AnimeWatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error,
                                     {episodeData?.sources && <MediaPlayer ref={player}
                                         title={episodeInfo?.title}
                                         src={{
-                                            src: episodeData?.sources && episodeData?.sources.find((x: any) => x.quality == "default")?.url || "",
+                                            src: episodeData?.sources.find((x: any) => x.quality == "default")?.url || "",
                                             type: 'application/x-mpegurl',
                                         }}
                                         poster={episodeInfo?.image}
@@ -330,33 +293,52 @@ const AnimeWatchPage = ({ data, episodeInfo, epData, episodes, episodeId, error,
 
 
                             <div className="col-span-1 rounded-lg h-[800px] shadow-md p-4 mb-3" style={bgStyle}>
-                                <h3 className="text-lg font-semibold mb-4">Episode List</h3>
-                                <div className="wrapper  h-[20%] overflow-y-scroll">
-                                    <ul className="flex gap-2 flex-wrap">
-                                        {episodes?.map((ep: any) => (
-                                            <Link href={`/watch/${anime?.id}/${ep.number}`} key={ep.id}>
-                                                <li className="p-3 bg-gray-800 rounded-sm hover:bg-gray-600 cursor-pointer transition-all">{ep.number}</li>
-                                            </Link>
-                                        ))}
-                                    </ul>
+                                <div className="flex items-center justify-between w-[100%] mb-4">
+                                    {!searchEnabled && <>
+                                        <h3 className="text-lg font-semibold">Episode List</h3>
+                                        <Button variant="ghost" color="primary" isIconOnly radius='full' onClick={
+                                            () => {
+                                                setSearchEnabled(!searchEnabled);
+                                            }
+                                        }>
+                                            <SearchIcon scale={1.5} />
+                                        </Button></>}
+                                    {searchEnabled && <>
+                                        <Input
+                                            isClearable
+                                            onClear={() => {
+                                                setFilteredEpisodes(episodes);
+                                                setSearchEnabled(false);
+                                            }}
+                                            placeholder="Search Episode"
+                                            onKeyPress={(e: any) => {
+                                               if(e?.key == "Enter") {
+                                                   const query = e?.target?.value;
+                                                   if (!query || query == "") return setFilteredEpisodes(episodes);
+                                                   const filteredEpisodes = episodes?.filter((x: any) => x?.title?.toLowerCase().includes(query?.toLowerCase())
+                                                       || x?.number?.toString().includes(query?.toLowerCase())
+                                                   );
+                                                   setFilteredEpisodes(filteredEpisodes);
+                                               }
+                                            }}
+                                        />
+                                    </>}
                                 </div>
-                                <div className="wrapper h-[550px] overflow-y-scroll mt-3">
-                                    <ul className="flex gap-2 flex-wrap ">
-                                        {episodes?.map((ep: any) => (
-                                            <Link href={`/watch/${anime?.id}/${ep.number}`} className="w-full" key={ep.id}>
-                                                <li className={`p-3 rounded-sm  cursor-pointer transition-all w-full ${ep.id == episodeId ? "bg-blue-500 text-black hover:bg-blue-600" : "bg-gray-800 hover:bg-gray-600"}`} key={ep.id}>
-                                                    <div className="flex gap-2 justify-between">
-                                                        <div className="flex flex-col">
-                                                            <h4 className="font-semibold">{ep?.title?.length > 55 ? ep.title.slice(0, 55) + "..." : ep.title}</h4>
-                                                            {ep?.airDate && <p className="text-gray-300">{shortDateFormatter.format(new Date(ep?.airDate))}</p>}
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <h4 className="font-semibold">Watch</h4>
-                                                            <p className="text-gray-300">Ep {ep.number}</p>
-                                                        </div>
+                                <div className="wrapper h-[93%] overflow-y-scroll">
+                                    <ul className="flex flex-col p-1">
+                                        {filteredEpisodes?.map((ep: any, index: number) => (
+                                            <li className="border-gray-400 flex flex-row mb-2" key={ep?.id}>
+                                                <div className={`select-none cursor-pointer ${(index + 1).toString() == episodeNumber ? "bg-gray-900" : "bg-slate-800"} rounded-md flex flex-1 items-center p-3  transition duration-500 ease-in-out transform hover:-translate-y-1 hover:shadow-lg`}>
+                                                    <div className="flex flex-col rounded-md w-10 h-10 bg-gray-300 justify-center items-center mr-4">
+                                                        <Image src={ep?.image} alt="Episode Image" className="w-10 h-10 object-cover rounded-md" />
                                                     </div>
-                                                </li>
-                                            </Link>
+                                                    <div className="flex-1 pl-1">
+                                                        <div className="font-medium">{ep?.title}</div>
+                                                        <div className="text-gray-600 text-sm">{ep?.number} Episode</div>
+                                                    </div>
+
+                                                </div>
+                                            </li>
                                         ))}
                                     </ul>
                                 </div>

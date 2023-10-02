@@ -151,7 +151,7 @@ export default function App({
 						<UserProvider>
 							<Component {...pageProps} />
 						</UserProvider>
-					</SessionProvider>x``
+					</SessionProvider>
 				</NextThemesProvider>
 			</NextUIProvider>
 		</>
