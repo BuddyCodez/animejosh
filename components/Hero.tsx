@@ -15,6 +15,7 @@ import useFetcher from "@/utils/fetcher";
 import { siteConfig } from "@/config/site";
 import parseText from "@/utils/parseText";
 import parse from 'html-react-parser';
+import { Skeleton } from "@mui/material";
 const Hero = () => {
     const router = useRouter();
     const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
@@ -27,6 +28,11 @@ const Hero = () => {
         <section className="MyHero hero flex justify-start items-start p-0" >
             <div className="w-full h-auto" style={{ margin: "0px 0" }}>
                 {!isLoading && <Swiper
+                    style={
+                        {
+                            height: "80vh"
+                        }
+                    }
                     // install Swiper modules
                     modules={[Pagination, Autoplay]}
                     spaceBetween={30}
@@ -92,6 +98,9 @@ const Hero = () => {
                         </SwiperSlide>
                     })}
                 </Swiper>}
+                {isLoading && <>
+                    <Skeleton variant="rectangular" sx={{ bgcolor: 'grey.800' }} animation="wave" width="100%" height="80vh"></Skeleton>
+                </>}
             </div>
         </section>
     );

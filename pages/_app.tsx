@@ -15,6 +15,7 @@ import { siteConfig } from '@/config/site';
 import { SessionProvider } from "next-auth/react"
 import { UserProvider } from '@/contex/User';
 import Script from 'next/script';
+import { Analytics } from '@vercel/analytics/react';
 export default function App({
 	Component,
 	pageProps: { session, ...pageProps },
@@ -150,6 +151,7 @@ export default function App({
 					<SessionProvider session={session}>
 						<UserProvider>
 							<Component {...pageProps} />
+							<Analytics />
 						</UserProvider>
 					</SessionProvider>
 				</NextThemesProvider>

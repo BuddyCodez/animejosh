@@ -2,7 +2,7 @@ import { siteConfig } from '@/config/site';
 import useFetcher from '@/utils/fetcher';
 import React from 'react'
 import { Loader } from './Trending';
-import { Badge, Button, Card, CardFooter, CardHeader, Image } from '@nextui-org/react';
+import { Badge, Button, Card, CardFooter, CardHeader, Image, Tooltip } from '@nextui-org/react';
 import { useRouter } from 'next/router';
 import parseText from '@/utils/parseText';
 import { CircularProgress, Grid, Typography } from '@mui/material';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 import Latestsection from "./Latestsection";
 import { BsArrowRight, BsCalendar2DateFill, BsEye, BsStar } from 'react-icons/bs';
 import { TbCalendarStats } from 'react-icons/tb';
+import AnimeMiniInfo from './AnimeMiniInfo';
 const Toprated = () => {
     const router = useRouter();
     const { data: subdata, isLoading: subloading } = useFetcher("https://animejosh.uditvegad.repl.co/recent-release?type=1");
@@ -40,32 +41,44 @@ const Toprated = () => {
                                         <div className="loader"></div>
                                     </div>}
                                     {!trendLoad && trending?.results.map((item: any, index: number) => { 
-                                        return <Link href={'/anime/' + item?.id} className="col-lg-4 col-md-6 col-sm-6" key={item?.id}>
-                                            <div className="product__item">
-                                                <div className="product__item__pic set-bg" style={{
-                                                    backgroundImage: `url(${item?.image})`,
-                                                    backgroundSize: "cover",
-                                                    backgroundPosition: "center",
-                                                    backgroundRepeat: "no-repeat"
-                                                }}>
-                                                    <div className="ep">{item?.totalEpisodes} Ep</div>
-                                                    <div className="comment"><span className='flex items-center gap-1'><BsStar /> {item?.rating / 10}</span></div>
-                                                    <div className="view">
-                                                        <span className='flex items-center gap-1'>
-                                                            <TbCalendarStats /> {item?.releaseDate}
-                                                        </span>
-                                                       </div>
-                                                </div>
-                                                <div className="product__item__text">
-                                                    <ul className='flex gap-1'>
-                                                        {item?.genres && item?.genres.slice(0, 3).map((genre: any, index: number) => (
-                                                           <li key={index}>{genre}</li>
-                                                       ))}
-                                                    </ul>
-                                                    <h5>{parseText(item?.title)}</h5>
-                                                </div>
-                                            </div>
-                                        </Link>
+                                        return <>
+                                            <Tooltip key={item?.id}
+                                                showArrow
+                                                size="lg"
+                                                placement="right"
+                                                content={
+                                                    <AnimeMiniInfo id={item?.id} />
+                                                }
+
+                                            >
+                                                <Link href={'/anime/' + item?.id} className="col-lg-4 col-md-6 col-sm-6" >
+                                                    <div className="product__item">
+                                                        <div className="product__item__pic set-bg" style={{
+                                                            backgroundImage: `url(${item?.image})`,
+                                                            backgroundSize: "cover",
+                                                            backgroundPosition: "center",
+                                                            backgroundRepeat: "no-repeat"
+                                                        }}>
+                                                            <div className="ep">{item?.totalEpisodes} Ep</div>
+                                                            <div className="comment"><span className='flex items-center gap-1'><BsStar /> {item?.rating / 10}</span></div>
+                                                            <div className="view">
+                                                                <span className='flex items-center gap-1'>
+                                                                    <TbCalendarStats /> {item?.releaseDate}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="product__item__text">
+                                                            <ul className='flex gap-1'>
+                                                                {item?.genres && item?.genres.slice(0, 3).map((genre: any, index: number) => (
+                                                                    <li key={index}>{genre}</li>
+                                                                ))}
+                                                            </ul>
+                                                            <h5>{parseText(item?.title)}</h5>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                        </Tooltip>
+                                        </>
                                     })}
                                 </div>
                             </div>

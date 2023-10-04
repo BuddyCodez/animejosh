@@ -1,20 +1,21 @@
-import { Image, CircularProgress, Card, Skeleton, Button } from "@nextui-org/react";
+import { Image, CircularProgress, Card,  Button } from "@nextui-org/react";
 import { useRef, RefObject } from "react";
 import Link from "next/link";
 import useFetcher from "@/utils/fetcher";
 import { siteConfig } from "@/config/site";
 import { BsChevronRight, BsChevronLeft } from "react-icons/bs";
 import parseText from "@/utils/parseText";
+import { Skeleton } from "@mui/material";
 const Loader = () => {
     return (
         <>
-            <div className="flex justify-center items-center w-full h-full gap-2">
+            <div className="flex justify-center items-center w-full h-full gap-2 p-2">
                 {[1, 2, 3, 4, 5, 6, 7].map((e: any) => (
-                    <Card className="w-[200px] h-[200px]" radius="lg" key={e}>
-                        <Skeleton className="rounded-lg">
-                            <div className="h-[200px] rounded-lg bg-default-300"></div>
+                    <Skeleton variant="rounded"
+                        sx={{ bgcolor: 'grey.800' }}
+                        animation="wave"
+                        width={130} height={150}>
                         </Skeleton>
-                    </Card>
                 ))}
             </div>
         </>
@@ -117,8 +118,12 @@ const Trending = () => {
 
 
                             <Button 
-                                variant="solid"
+                                variant="ghost"
                                 color="primary"
+                                style={{
+                                    width: '80%',
+                                    padding: '0 0.5rem',
+                                }}
                                 isIconOnly
                                 endContent={
                                     <span className="Rotate">
@@ -139,9 +144,13 @@ const Trending = () => {
 
 
 
-                            <Button variant="solid"
+                            <Button variant="ghost"
                                 color="primary"
                                 isIconOnly
+                                style={{
+                                    width: '80%',
+                                    padding: '0 0.5rem',
+                                }}
                                 endContent={
                                     <span className="Rotate">
                                         <BsChevronLeft />
