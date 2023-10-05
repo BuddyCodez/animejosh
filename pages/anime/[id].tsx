@@ -7,7 +7,7 @@ import parseText, { parseAllText, textType } from '@/utils/parseText';
 import StarRating from '@/components/starRating';
 import parse from 'html-react-parser';
 import { BsPlay, BsPlayFill, BsSend, BsTrash2Fill } from 'react-icons/bs';
-
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import useFetcher from '@/utils/fetcher';
 import { parseISO, formatDistanceToNow } from 'date-fns';
@@ -15,6 +15,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { useSession } from 'next-auth/react';
 import { userContextType, useUserContext } from '@/contex/User';
+import { NextSeo } from 'next-seo';
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref,
@@ -205,10 +206,46 @@ const AnimeDetails = () => {
       setEpisodes(topEpisodes);
     }
   }, [anime]);
-
   return (
     <>
       <DefaultLayout>
+        <Head>
+          <title id='title'>{isLoading ? "Loading..." : parseText(anime?.title) + "| AnimeVite"}</title>
+          {!isLoading &&
+            <NextSeo
+              themeColor='#000000'
+              title={parseText(anime?.title)}
+              titleTemplate='AnimeVite | Anime: %s'
+              openGraph={{
+                type: 'article',
+                title: anime?.title || "Anime",
+                description: anime?.description || "Anime",
+                url: `https://animevite.vercel.app/anime/${anime?.id}`,
+                siteName: siteConfig.name,
+                article: {
+                  publishedTime: anime?.releaseDate,
+                  section: 'Anime Info',
+                  authors: anime?.authors,
+                  tags: [
+                    anime?.genres?.map((article: any) => article),
+                    anime?.studios?.map((article: any) => article),
+                    anime?.synonyms?.map((article: any) => article),
+                    anime?.characters?.map((character: any) => character?.name?.full),
+                    anime?.title
+                  ],
+                },
+                images: [
+                  {
+                    url: anime?.image || "",
+                    width: 800,
+                    height: 600,
+                    alt: 'Anime Image',
+                  },
+                ],
+              }}
+            />
+          }
+        </Head>
         <article>
           <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
             <Alert onClose={handleClose} severity={alert?.type || "error"} sx={{ width: '100%' }}>
@@ -241,7 +278,7 @@ const AnimeDetails = () => {
                       </div>
                       <div className="anime__details__rating  hideonphone">
                         <div className="rating flex">
-                          {isLoading ? <Skeleton className="h-3 w-3/5 rounded-lg" /> : <StarRating rating={anime?.rating / 10} />}
+                          {isLoading ? <Skeleton className="h-3 w-3/5 rounded-lg" /> : anime?.rating ? <StarRating rating={anime?.rating} /> : 'Not Rated.'}
                         </div>
                       </div>
                       <div className="h-[200px] overflow-y-scroll p-3">
@@ -433,27 +470,27 @@ const AnimeDetails = () => {
                       <h5 className='p-0 w-[120px]'>you might like...</h5>
                     </div>
                     <div className="flex flex-col w-full justify-center items-center mt-3 gap-3">
-                      
-                    {
-                      isLoading && [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item: any, index: number) => {
-                        return <Card className=" h-[300px] w-[250px]" isPressable isHoverable key={index}>
-                          <CardHeader className="absolute z-10 top-1 flex-col !items-start">
-                            <div className="flex justify-between w-full">
+
+                      {
+                        isLoading && [1, 2, 3, 4, 5, 6, 7, 8, 9].map((item: any, index: number) => {
+                          return <Card className=" h-[300px] w-[250px]" isPressable isHoverable key={index}>
+                            <CardHeader className="absolute z-10 top-1 flex-col !items-start">
+                              <div className="flex justify-between w-full">
+                                <Skeleton className="h-3 w-3/5 rounded-lg" />
+                              </div>
+                            </CardHeader>
+                            <Skeleton className="h-[200px] w-full rounded-lg" />
+                            <CardFooter className="absolute z-10 bottom-0 flex-col" style={{
+                              backgroundImage: " linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0))",
+                              width: "100%"
+                            }}>
                               <Skeleton className="h-3 w-3/5 rounded-lg" />
-                            </div>
-                          </CardHeader>
-                          <Skeleton className="h-[200px] w-full rounded-lg" />
-                          <CardFooter className="absolute z-10 bottom-0 flex-col" style={{
-                            backgroundImage: " linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0))",
-                            width: "100%"
-                          }}>
-                            <Skeleton className="h-3 w-3/5 rounded-lg" />
-                          </CardFooter>
-                        </Card>
-                      })
+                            </CardFooter>
+                          </Card>
+                        })
 
                       }
-                      {!isLoading && anime?.recommendations && anime?.recommendations?.slice(0,5)?.map((item: any, index: number) => {
+                      {!isLoading && anime?.recommendations && anime?.recommendations?.slice(0, 5)?.map((item: any, index: number) => {
                         return <Card className="h-[300px] w-[250px]" isPressable isHoverable key={item?.id || index}
                           onPress={() => {
                             router.push("/anime/" + item?.id);
@@ -493,7 +530,7 @@ const AnimeDetails = () => {
                           </CardFooter>
                         </Card>
                       })}
-                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

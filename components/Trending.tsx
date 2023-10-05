@@ -11,7 +11,7 @@ const Loader = () => {
         <>
             <div className="flex justify-center items-center w-full h-full gap-2 p-2">
                 {[1, 2, 3, 4, 5, 6, 7].map((e: any) => (
-                    <Skeleton variant="rounded"
+                    <Skeleton variant="rounded" key={e}
                         sx={{ bgcolor: 'grey.800' }}
                         animation="wave"
                         width={130} height={150}>
