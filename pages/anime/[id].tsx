@@ -232,7 +232,7 @@ const AnimeDetails = () => {
                     ...(anime?.genres || []),
                     ...(anime?.studios || []),
                     ...(anime?.synonyms || []),
-                    ...(anime?.characters?.map((character) => character?.name?.full) || []),
+                    ...(anime?.characters?.map((character: any) => character?.name?.full) || []),
                     anime?.title || "Anime",
                   ],
                 },
