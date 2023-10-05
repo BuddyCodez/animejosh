@@ -15,7 +15,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { useSession } from 'next-auth/react';
 import { userContextType, useUserContext } from '@/contex/User';
-import { NextSeo } from 'next-seo';
+import { ArticleJsonLd, NextSeo } from 'next-seo';
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref,
@@ -214,38 +214,57 @@ const AnimeDetails = () => {
             {isLoading ? "AnimeVite" : `${parseText(anime?.title)} | AnimeVite`}
           </title>
           {!isLoading && (
-            <NextSeo
-              themeColor='#000000'
-              title={parseText(anime?.title)}
-              titleTemplate='AnimeVite | Anime: %s'
-              openGraph={{
-                type: 'article',
-                title: anime?.title || "AnimeVite",
-                description: anime?.description || "Explore anime on AnimeVite.",
-                url: `https://animevite.vercel.app/anime/${anime?.id}`,
-                siteName: siteConfig.name,
-                article: {
-                  publishedTime: anime?.releaseDate,
-                  section: 'Anime Info',
-                  authors: anime?.authors,
-                  tags: [
-                    ...(anime?.genres || []),
-                    ...(anime?.studios || []),
-                    ...(anime?.synonyms || []),
-                    ...(anime?.characters?.map((character: any) => character?.name?.full) || []),
-                    anime?.title || "Anime",
-                  ],
-                },
-                images: [
-                  {
-                    url: anime?.image || "",
-                    width: 800,
-                    height: 600,
-                    alt: 'Anime Image',
+            <>
+              <NextSeo
+                themeColor='#000000'
+                title={parseText(anime?.title)}
+                titleTemplate='AnimeVite | Anime: %s'
+                openGraph={{
+                  type: 'article',
+                  title: anime?.title || "AnimeVite",
+                  description: anime?.description || "Explore anime on AnimeVite.",
+                  url: `https://animevite.vercel.app/anime/${anime?.id}`,
+                  siteName: siteConfig.name,
+                  article: {
+                    publishedTime: anime?.releaseDate,
+                    section: 'Anime Info',
+                    authors: anime?.authors,
+                    tags: [
+                      ...(anime?.genres || []),
+                      ...(anime?.studios || []),
+                      ...(anime?.synonyms || []),
+                      ...(anime?.characters?.map((character: any) => character?.name?.full) || []),
+                      anime?.title || "Anime",
+                    ],
                   },
-                ],
-              }}
-            />
+                  images: [
+                    {
+                      url: anime?.image || "",
+                      width: 800,
+                      height: 600,
+                      alt: 'Anime Image',
+                    },
+                  ],
+                }}
+              />
+              <ArticleJsonLd
+                url={`https://animevite.vercel.app/anime/${anime?.id}`}
+                title={anime?.title || "AnimeVite"}
+                description={anime?.description || "Explore anime on AnimeVite."}
+                images={[anime?.image || ""]}
+                datePublished={anime?.releaseDate} // You may need to format this date correctly
+                authors={[anime?.authors || ""]} // You may need to format this data
+                publisherName={siteConfig.name}
+                authorName={anime?.authors || ""}
+                keywords={[
+                  ...(anime?.genres || []),
+                  ...(anime?.studios || []),
+                  ...(anime?.synonyms || []),
+                  ...(anime?.characters?.map((character: any) => character?.name?.full) || []),
+                  anime?.title || "Anime",
+                ]}
+              />
+            </>
           )}
         </Head>
         <article>
