@@ -210,16 +210,18 @@ const AnimeDetails = () => {
     <>
       <DefaultLayout>
         <Head>
-          <title id='title'>{isLoading ? "Loading..." : parseText(anime?.title) + "| AnimeVite"}</title>
-          {!isLoading &&
+          <title id='title'>
+            {isLoading ? "AnimeVite" : `${parseText(anime?.title)} | AnimeVite`}
+          </title>
+          {!isLoading && (
             <NextSeo
               themeColor='#000000'
               title={parseText(anime?.title)}
               titleTemplate='AnimeVite | Anime: %s'
               openGraph={{
                 type: 'article',
-                title: anime?.title || "Anime",
-                description: anime?.description || "Anime",
+                title: anime?.title || "AnimeVite",
+                description: anime?.description || "Explore anime on AnimeVite.",
                 url: `https://animevite.vercel.app/anime/${anime?.id}`,
                 siteName: siteConfig.name,
                 article: {
@@ -227,11 +229,11 @@ const AnimeDetails = () => {
                   section: 'Anime Info',
                   authors: anime?.authors,
                   tags: [
-                    anime?.genres?.map((article: any) => article),
-                    anime?.studios?.map((article: any) => article),
-                    anime?.synonyms?.map((article: any) => article),
-                    anime?.characters?.map((character: any) => character?.name?.full),
-                    anime?.title
+                    ...(anime?.genres || []),
+                    ...(anime?.studios || []),
+                    ...(anime?.synonyms || []),
+                    ...(anime?.characters?.map((character) => character?.name?.full) || []),
+                    anime?.title || "Anime",
                   ],
                 },
                 images: [
@@ -244,7 +246,7 @@ const AnimeDetails = () => {
                 ],
               }}
             />
-          }
+          )}
         </Head>
         <article>
           <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
