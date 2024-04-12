@@ -54,7 +54,7 @@ export const siteConfig = {
 		discord: "https://discord.gg/9Ab7pzwxjh",
 		sponsor: "https://www.patreon.com/UditVegad"
 	},
-	apiUrl: "https://cosumetinstance.vercel.app",
+	apiUrl: "https://animeapiastra.vercel.app",
 	geners: [
 		"Action",
 		"Adventure",
